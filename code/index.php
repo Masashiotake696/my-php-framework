@@ -17,7 +17,5 @@ $controller = new $controllerName;
 $controller->run();
 
 // クエリを取得
-$param = $route->getQuery();
-
-// echo display('index.html', $param);
+$query = $route->getQuery('test');
 ?>

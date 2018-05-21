@@ -9,7 +9,7 @@ class Route {
     $request = $this->getRequest(1);
 
     // リクエストのクエリを削除
-    if(strpos($request, '?') !== FALSE) {
+    if($this->has_query($request)) {
       $request = strstr($request, '?', true);
     }
 
@@ -25,15 +25,33 @@ class Route {
     }
   }
 
-  public function getQuery() {
+  public function getQuery($param) {
     // クエリを取得
-    $query = $this->getRequest(2);
+    $request = $this->getRequest(1);
 
-    if(is_null($query)) { // クエリがNULLか判定
+    // クエリがあるか判定
+    if($this->has_query($request)) {
+      // 「?」以降を取得
+      $query = ltrim(strstr($request, '?'), '?');
+      // 「&」で区切る
+      $array = explode('&', $query);
 
+      // クエリをkeyとvalueの形で配列に格納
+      $queryArray = array();
+      foreach ($array as $value) {
+        // 「=」で区切る
+        $buf = explode('=', $value, 2);
+        $queryArray[$buf[0]] = $buf[1];
+      }
+
+      // 引数で指定されたkeyが存在する場合にそれを返す
+      if(is_null($queryArray[$param])) {
+        return '';
+      } else {
+        return $queryArray[$param];
+      }
     } else {
-      // 「=」以降を取得
-      preg_match('/^\?(.+)=(.+)$/', $query, $result);
+      return '';
     }
   }
 
@@ -43,12 +61,12 @@ class Route {
   * @return bool
   */
   private function existsController($path) {
-    if($path === NULL) {
+    if(is_null($path)) {
       return FALSE;
     } else {
       // パスを作成
       $path = $path . 'Controller.php';
-      
+
       // ファイルが存在するか判定
       return file_exists('./controller/' . $path);
     }
@@ -70,5 +88,14 @@ class Route {
 
     // 引数に応じてリクエストを返す
     return $params[$subscript];
+  }
+
+  private function has_query($request) {
+    // リクエストが「?」と「=」を含むかを判定
+    if(strpos($request, '?') !== FALSE && strpos($request, '=') !== FALSE) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
   }
 }
