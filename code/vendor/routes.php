@@ -1,15 +1,15 @@
 <?php
-class Route {
+class Routes {
   /*
   * URLに応じた処理を行うコントローラー名を返す
   * @return String コントローラー名
   */
-  public function getControllerName() {
+  public static function getControllerName() {
     // リクエストを取得
-    $request = $this->getRequest(1);
+    $request = Routes::getRequest(1);
 
     // リクエストのクエリを削除
-    if($this->has_query($request)) {
+    if(Routes::has_query($request)) {
       $request = strstr($request, '?', true);
     }
 
@@ -17,7 +17,7 @@ class Route {
     $request = ucfirst($request);
 
     // ファイルが存在するか確かめる
-    if($this->existsController($request)) {
+    if(Routes::existsController($request)) {
       // 文字列整形して返す
       return $request . 'Controller';
     } else {
@@ -25,12 +25,16 @@ class Route {
     }
   }
 
-  public function getQuery($param) {
+  /*
+  * 全てのクエリをキーバリューで取得する
+  * @return array 全てのクエリをキーバリューで格納した配列
+  */
+  public static function getAllQuery() {
     // クエリを取得
-    $request = $this->getRequest(1);
+    $request = Routes::getRequest(1);
 
     // クエリがあるか判定
-    if($this->has_query($request)) {
+    if(Routes::has_query($request)) {
       // 「?」以降を取得
       $query = ltrim(strstr($request, '?'), '?');
       // 「&」で区切る
@@ -43,16 +47,27 @@ class Route {
         $buf = explode('=', $value, 2);
         $queryArray[$buf[0]] = $buf[1];
       }
-
-      // 引数で指定されたkeyが存在する場合にそれを返す
-      if(is_null($queryArray[$param])) {
-        return '';
-      } else {
-        return $queryArray[$param];
-      }
+      return $queryArray;
     } else {
-      return '';
+      return [];
     }
+  }
+
+  /*
+  * 特定のクエリをキーバリューで取得する
+  * @param $queryName クエリ名
+  * @return array 引数で指定したクエリをキーバリューで格納した配列
+  */
+  public static function getOneQuery($queryName) {
+    $array = Routes::getAllQuery();
+    if(count($array) > 0) {
+      foreach ($array as $key => $value) {
+        if($key === $queryName) {
+          return $value;
+        }
+      }
+    }
+    return '';
   }
 
   /*
@@ -90,6 +105,11 @@ class Route {
     return $params[$subscript];
   }
 
+  /*
+  * リクエストにクエリがあるか判定
+  * @param リクエスト
+  * @return bool
+  */
   private function has_query($request) {
     // リクエストが「?」と「=」を含むかを判定
     if(strpos($request, '?') !== FALSE && strpos($request, '=') !== FALSE) {

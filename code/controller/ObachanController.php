@@ -1,6 +1,6 @@
 <?php
 class ObachanController extends BaseController {
-  public function run() {
+  public function action() {
     echo '元気です!';
   }
 }

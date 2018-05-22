@@ -1,6 +1,6 @@
 <?php
 class OthersController extends BaseController {
-  public function run() {
+  public function action() {
     echo '誰!?';
   }
 }
