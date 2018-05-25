@@ -16,7 +16,7 @@ class Routes {
 
     // ルーティングファイルの読み込み
     $routing = [];
-    require_once('./vendor/routing.php');
+    require_once('./routes/routing.php');
 
     // URLに該当するコントローラーを取得
     $controller = $routing[$request];
