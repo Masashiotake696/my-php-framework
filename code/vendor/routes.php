@@ -1,4 +1,5 @@
 <?php
+
 class Routes {
   /*
   * URLに応じた処理を行うコントローラー名を返す
@@ -13,13 +14,17 @@ class Routes {
       $request = strstr($request, '?', true);
     }
 
-    // リクエストの最初の文字を大文字にする
-    $request = ucfirst($request);
+    // ルーティングファイルの読み込み
+    $routing = [];
+    require_once('./vendor/routing.php');
+
+    // URLに該当するコントローラーを取得
+    $controller = $routing[$request];
 
     // ファイルが存在するか確かめる
-    if(Routes::existsController($request)) {
+    if(Routes::existsController($controller)) {
       // 文字列整形して返す
-      return $request . 'Controller';
+      return $controller;
     } else {
       return 'OthersController';
     }
@@ -80,7 +85,7 @@ class Routes {
       return FALSE;
     } else {
       // パスを作成
-      $path = $path . 'Controller.php';
+      $path = $path . '.php';
 
       // ファイルが存在するか判定
       return file_exists('./controller/' . $path);
@@ -102,7 +107,7 @@ class Routes {
     $params = explode('/', $requestUrl);
 
     // 引数に応じてリクエストを返す
-    return $params[$subscript];
+    return '/' . $params[$subscript];
   }
 
   /*
@@ -111,8 +116,8 @@ class Routes {
   * @return bool
   */
   private function has_query($request) {
-    // リクエストが「?」と「=」を含むかを判定
-    if(strpos($request, '?') !== FALSE && strpos($request, '=') !== FALSE) {
+    // リクエストが「?」を含むかを判定
+    if(strpos($request, '?') !== FALSE) {
       return TRUE;
     } else {
       return FALSE;
