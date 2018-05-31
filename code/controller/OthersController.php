@@ -1,6 +1,7 @@
 <?php
+
 class OthersController extends BaseController {
   public function action() {
-    echo '誰!?';
+    $this->db->exec("INSERT INTO tests (testint, testchar5) VALUES (111, 'aa')");
   }
 }
