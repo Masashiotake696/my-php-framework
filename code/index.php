@@ -15,5 +15,5 @@ $controllerName = Routes::getControllerName();
 $controller = new $controllerName;
 
 // 実行
-$controller->action();
+$controller->executeAction();
 ?>
