@@ -4,6 +4,7 @@ require_once('./vendor/controller/BaseController.php');
 abstract class DatabaseController {
     protected $db;
 
+    // 継承するコントローラーの共通処理
     protected abstract function action();
 
     // コンストラクタ
@@ -15,17 +16,17 @@ abstract class DatabaseController {
     // トランザクションを実行してからactionを実行
     public function executeAction() {
         try {
-        // トランザクションの開始
-        $this->db->beginTransaction();
-        // アクションを実行
-        $this->action();
-        // 例外処理がなかった場合はコミット
-        $this->db->commit();
-        echo 'できたよ';
+            // トランザクションの開始
+            $this->db->beginTransaction();
+            // アクションを実行
+            $this->action();
+            // 例外処理がなかった場合はコミット
+            $this->db->commit();
+            echo 'できたよ';
         } catch(Exception $e) {
-        // 接続に失敗した場合はエラーメッセージを出す
-        $this->db->rollback();
-        echo  'Error: ' . $e->getMessage();
+            // 接続に失敗した場合はエラーメッセージを出す
+            $this->db->rollback();
+            echo  'Error: ' . $e->getMessage();
         }
     }
 
