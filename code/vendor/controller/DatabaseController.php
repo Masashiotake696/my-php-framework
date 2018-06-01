@@ -1,11 +1,8 @@
 <?php
 require_once('./vendor/controller/BaseController.php');
 
-abstract class DatabaseController {
+abstract class DatabaseController extends BaseController {
     protected $db;
-
-    // 継承するコントローラーの共通処理
-    protected abstract function action();
 
     // コンストラクタ
     public function __construct() {
