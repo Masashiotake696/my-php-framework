@@ -2,6 +2,8 @@
 // vendorファイルの読み込み
 require_once('./vendor/routes.php');
 require_once('./vendor/controller/BaseController.php');
+require_once('./vendor/controller/DatabaseController.php');
+require_once('./vendor/routes.php');
 
 // コントローラーのファイルを読み込み
 spl_autoload_register(function($className) {

@@ -1,5 +1,4 @@
 <?php
-require_once('./vendor/controller/DatabaseController.php');
 
 class OthersController extends DatabaseController {
   public function action() {

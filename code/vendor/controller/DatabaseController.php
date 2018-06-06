@@ -1,5 +1,4 @@
 <?php
-require_once('./vendor/controller/BaseController.php');
 
 abstract class DatabaseController extends BaseController {
     protected $db;

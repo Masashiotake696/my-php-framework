@@ -1,5 +1,4 @@
 <?php
-require_once('./vendor/routes.php');
 
 class ObaController extends BaseController {
   public function action() {
