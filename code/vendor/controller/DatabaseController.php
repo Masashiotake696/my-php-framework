@@ -10,19 +10,23 @@ abstract class DatabaseController extends BaseController {
     }
 
     // トランザクションを実行してからactionを実行
-    public function executeAction() {
+    public function executeAction($action, $request) {
         try {
             // トランザクションの開始
             $this->db->beginTransaction();
             // アクションを実行
-            $this->action();
+            $this->$action($request);
             // 例外処理がなかった場合はコミット
             $this->db->commit();
             echo 'できたよ';
         } catch(Exception $e) {
             // 接続に失敗した場合はエラーメッセージを出す
             $this->db->rollback();
-            echo  'Error: ' . $e->getMessage();
+
+            // 
+            header("HTTP/1.0 500 Internal Server Error");
+            echo(file_get_contents("./view/500.html"));
+            exit;
         }
     }
 

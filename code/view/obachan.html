@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>おばちゃん</title>
+  </head>
+  <body>
+    <h1>Obachan Form</h1>
+    <form action="/obachan" method="POST">
+      <p>
+        名前：<input type="text" name="name">文字列, 最小1文字, 最大20文字
+      </p>
+      <p>
+        年齢：<input type="number" name="age">数値, 最小0, 最大130
+      </p>
+      <p>
+        住所：<input type="text" name="address">文字列, 必須
+      </p>
+      <p>
+        <input type="submit" value="送信">
+      </p>
+    </form>
+  </body>
+</html>

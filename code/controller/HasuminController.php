@@ -1,7 +1,7 @@
 <?php
 
 class HasuminController extends BaseController {
-  public function action() {
+  public function show() {
     echo 'Androidらぶ';
   }
 }

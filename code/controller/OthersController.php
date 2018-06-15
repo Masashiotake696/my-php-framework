@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Not using this file
+ */
 class OthersController extends DatabaseController {
   public function action() {
     $this->db->exec("INSERT INTO tests (testint, testchar5) VALUES (111, 'aa')");

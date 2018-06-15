@@ -1,7 +1,7 @@
 <?php
 
 class ObaController extends BaseController {
-  public function action() {
+  public function show() {
     // テンプレートインスタンスの生成
     $oba = new Template('oba');
     // 埋め込む値をセット
