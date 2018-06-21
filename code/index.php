@@ -1,6 +1,6 @@
 <?php
 // vendorファイルの読み込み
-require_once('./vendor/request.php');
+require_once('./vendor/Request.php');
 require_once('./vendor/controller/BaseController.php');
 require_once('./vendor/controller/DatabaseController.php');
 
@@ -11,35 +11,35 @@ spl_autoload_register(function($className) {
   }
 });
 
-
 try {
   // HTTPメソッドを取得
   $method = $_SERVER['REQUEST_METHOD'];
 
-  // クエリを取得
-  if($method !== 'GET') { // HTTPメソッドがGET以外の場合はHTTPリクエストのボディからクエリを取得
+  // クエリを取得(HTTPメソッドがGET以外の場合はHTTPリクエストのボディからクエリを取得)
+  if($method !== 'GET') {
     $query = file_get_contents('php://input');
   } else {
     $query = $_SERVER['QUERY_STRING'];
   }
 
-  // クエリが空であるか判定
+  // クエリを格納する連想配列
+  $query_hash = [];
+
+  // 連想配列の形でクエリを格納
   if(!empty($query)) {
     // &で区切る
     $query_array = explode('&', $query);
-    // 連想配列の形でクエリを格納
-    $query_hash = [];
+
     foreach($query_array as $query) {
-      if(strpos($query, '=') !== FALSE) { // &で区切ったクエリが'='を含むか判定
+      // &で区切ったクエリが'='を含むか判定
+      if(strpos($query, '=') !== FALSE) {
         $query = explode('=', $query);
-        if(count($query) === 2) { // =で分割したクエリがX=Yの形になっているか判定
+        // =で分割したクエリがX=Yの形になっているか判定
+        if(count($query) === 2) {
           $query_hash[$query[0]] = $query[1];
         }
       }
     }
-
-    // リクエストインスタンスを生成
-    $request = new Request($query_hash);
   }
 
   // パスを取得
@@ -66,12 +66,45 @@ try {
   if(empty($controller) || empty($action)) {
     throw new Exception();
   } else {
+    // コントローラー名を保持
+    $controller_name = $controller;
+
+    // コントローラーインスタンスを生成
     $controller = new $controller;
 
-    // 実行
+    // フォームリクエストの対応表を取得
+    require_once('./request/form_request.php');
+
+    // 該当するフォームリクエストを取得
+    $form_request_name = '';
+    foreach($form_requests as $form_request) {
+      if(
+        $form_request['controller'] === $controller_name &&
+        $form_request['action'] === $action
+      ) {
+        $form_request_name = $form_request['request'];
+      }
+    }
+
+    if(!empty($form_request_name)) {
+      require_once("./request/{$form_request_name}.php");
+
+      // フォームリクエストをインスタンス化
+      $request = new $form_request_name($path, $query_hash);
+      // ルールを実行する
+      $rules = $request->rules();
+      // バリデーションを実行
+      $request->validate($rules[0], $rules[1]);
+    } else {
+      // リクエストインスタンスを生成
+      $request = new Request($path, $query_hash);
+    }
+
+    // アクションを実行
     $controller->executeAction($action, $request);
   }
 } catch(Exception $e) {
+  // 該当するページが見つからない場合は404ページを表示
   header("HTTP/1.0 404 Not Found");
   echo(file_get_contents("./view/404.html"));
   exit;

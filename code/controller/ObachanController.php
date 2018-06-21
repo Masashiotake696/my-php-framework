@@ -7,22 +7,25 @@ class ObachanController extends BaseController {
   public function show() {
     // テンプレートインスタンスの生成
     $obachan = new Template('obachan');
-    // 埋め込む値をセット
-    // $oba->setTemplateKeyValue('obavar', Routes::getOneQuery('obavar'));
-    // 出力
+
+    // ビューの表示
     $obachan->outputTemplate();
   }
 
   /**
-   * 子リソースの作成
+   * とりあえずバリデーションする
    */
-  public function create($request) {
-    $request->validate([
-      'name' => ['string', 'min:1', 'max:20'],
-      'age' => ['numeric', 'min:0', 'max:130'],
-      'address' => ['string', 'require'],
-    ]);
+  public function create(Request $request) {
+    // $request->validate(
+    //   [
+    //     'name' => ['string', 'min:1', 'max:20'],
+    //     'age' => ['number', 'min:0', 'max:130'],
+    //     'address' => ['string', 'require'],
+    //   ],
+    //   'obachan'
+    // );
 
-    
+    echo 'OK';
+    exit;
   }
 }

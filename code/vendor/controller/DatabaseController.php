@@ -23,7 +23,7 @@ abstract class DatabaseController extends BaseController {
             // 接続に失敗した場合はエラーメッセージを出す
             $this->db->rollback();
 
-            // 
+            // 500エラーを返す
             header("HTTP/1.0 500 Internal Server Error");
             echo(file_get_contents("./view/500.html"));
             exit;

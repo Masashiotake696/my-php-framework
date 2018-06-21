@@ -8,14 +8,17 @@
     <h1>Obachan Form</h1>
     <form action="/obachan" method="POST">
       <p>
-        名前：<input type="text" name="name">文字列, 最小1文字, 最大20文字
+        名前：<input type="text" name="name" value="{{ $old('name') }}">文字列, 最小1文字, 最大20文字
       </p>
+      <p>{{ $errors->first('name') }}</p>
       <p>
-        年齢：<input type="number" name="age">数値, 最小0, 最大130
+        年齢：<input type="text" name="age" value="{{ $old('age') }}">数値, 最小0, 最大130
       </p>
+      <p>{{ $errors->all('age') }}</p>
       <p>
-        住所：<input type="text" name="address">文字列, 必須
+        住所：<input type="text" name="address" value="{{ $old('address') }}">文字列, 必須
       </p>
+      <p>{{ $errors->first('address') }}</p>
       <p>
         <input type="submit" value="送信">
       </p>

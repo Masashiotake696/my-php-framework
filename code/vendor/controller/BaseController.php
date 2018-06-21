@@ -1,5 +1,5 @@
 <?php
-require_once('./vendor/template.php');
+require_once('./vendor/Template.php');
 
 // 抽象クラスを作成
 abstract class BaseController {

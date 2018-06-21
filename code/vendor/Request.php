@@ -1,14 +1,21 @@
 <?php
 
+require_once('./vendor/Validation.php');
+
 class Request {
-  private $query;
+  private $path; // リクエストパス
+  private $query; // クエリパラメータ
+  private $validation; // バリデーションインスタンス
+  private $errors = []; // viewに渡すエラー
 
   /**
-   * queryプロパティにパラメータの連想配列を格納する
+   * pathプロパティにリクエストのパスを、queryプロパティにパラメータの連想配列を格納する
    *
+   * @param string $path パス
    * @param hash_array $query パラメータの連想配列
    */
-  public function __construct($query) {
+  public function __construct($path, $query = []) {
+    $this->path = $path;
     $this->query = $query;
   }
 
@@ -34,125 +41,103 @@ class Request {
   /**
    * バリデーションを行い、trueの場合は何もせず、falseの場合はエラーメッセージと共にリダイレクト
    *
-   * @params hash_array $params バリデーションを行う項目とその判定方法を格納した連想配列
+   * @param hash_array $params バリデーションを行う項目とその判定方法を格納した連想配列
+   * @param string $view バリデーションエラーがあった場合に表示するビュー
+   * @return void
    */
-  public function validate($params) {
-    $errors = [];
-    foreach($params as $key => $array) {
-      foreach($array as $method) {
-        if(strpos($method, ':') !== FALSE) { // ':'で条件を指定しているか判定
-          if($this->$method($key) !== TRUE) { // バリデーション
-            $errors[$key][] = $this->messages($key, $method); // エラーがあったらメッセージを格納
-          }
-        } else {
-          $array = explode(':', $method); // ':'で区切る
-          $method = $array[0];
-          $condition = $array[1];
-          if($this->$method($key, $condition) !== TRUE) { // バリデーション
-            $errors[$key][] = $this->messages($key, $method, $condition); // エラーがあったらメッセージを格納
-          }
+  public function validate($params, $view) {
+    // バリデーションインスタンスをプロパティに格納
+    $this->validation = new Validation($params);
+
+    // クエリを元にバリデーションを行い、エラーがあった場合に項目名とそのバリデーション項目をセット
+    $this->validation->setErrors($this->query);
+
+    // エラーが存在していたらエラープロパティにその値をセット
+    if($this->validation->hasError()) {
+      $this->setErrorMessages();
+    }
+
+    // エラーが存在していた場合は、エラーをセットしてviewを表示
+    if(count($this->errors) > 0) {
+      // テンプレートインスタンスの生成
+      $template = new Template($view);
+
+      // エラーをセット
+      $template->setErrors($this->errors);
+
+      // 入力値をセット
+      $template->setOld($this->query);
+
+      // ビューの表示
+      $template->outputTemplate();
+      exit;
+    }
+  }
+
+  /**
+   * エラーメッセージをセットする
+   *
+   * @return void
+   */
+  private function setErrorMessages() {
+
+    // エラーメッセージを取得
+    $messages = $this->messages();
+
+    // エラーがあった項目名とそのバリデーション項目を取得
+    $error_array = $this->validation->getErrors();
+
+    // エラーがあった項目に対してメッセージをセットする
+    foreach($error_array as $key => $methods) {
+      foreach($methods as $method) {
+        if(array_key_exists("{$key}.{$method}", $messages)) {
+          // プロパティにキーバリューの形で格納
+          $this->errors[$key][] = $messages["{$key}.{$method}"];
         }
       }
     }
   }
 
   /**
-   * 値が入力されているか判定
-   *
-   * @param string $key 判定項目名
-   * @return bool
-   */
-  private function required($key) {
-    return count($this->getOneQuery($key)) > 0;
-  }
-
-  /**
-   * 入力された値が文字列か判定
-   *
-   * @param string $key 判定項目名
-   * @return bool
-   */
-  private function string($key) {
-    return is_string($this->getOneQuery($key));
-  }
-
-  /**
-   * 入力された値が数値か判定
-   *
-   * @param string $key 判定項目名
-   * @return bool
-   */
-  private function numeric($key) {
-    return is_int($this->getOneQuery($key));
-  }
-
-  /**
-   * 入力された値が最小値で設定された条件を満たすか判定(文字列の場合は長さ、数値の場合は大きさ)
-   *
-   * @param string $key 判定項目名
-   * @param string $condition 最小値条件
-   * @return bool
-   */
-  private function min($key, $condition) {
-    // 最小値条件を文字列から数値に変換する
-    $condition = (int)$condition;
-
-    // キーに該当する値を取得
-    $query = $this->getOneQuery($key);
-
-    // 値が空の場合はfalseを返す
-    if(count($query) === 0) {
-      return false;
-    }
-
-    // 入力された項目が数字の場合は値の大小を比較
-    if(ctype_digit($query)) {
-      $query = (int)$query; // 文字列から数値に変換
-      return $query > $condition;
-    }
-
-    // 文字列の場合は値の長さを比較
-    return count($query) > $condition;
-  }
-
-  /**
-   * 入力された値が最大値で設定された条件を満たすか判定(文字列の場合は長さ、数値の場合は大きさ)
-   *
-   * @param string $key 判定項目名
-   * @param string $condition 最大値条件
-   * @return bool
-   */
-  private function max($key, $condition) {
-    // 最大値条件を文字列から数値に変換する
-    $condition = (int)$condition;
-
-    // キーに該当する値を取得
-    $query = $this->getOneQuery($key);
-
-    // 値が空の場合はfalseを返す
-    if(count($query) === 0) {
-      return false;
-    }
-
-    // 入力された項目が数字の場合は値の大小を比較
-    if(ctype_digit($query)) {
-      $query = (int)$query; // 文字列から数値に変換
-      return $query < $condition;
-    }
-
-    // 文字列の場合は値の長さを比較
-    return count($query) < $condition;
-  }
-
-  /**
    * エラーメッセージを返す
    *
-   * @param string $key エラーがあった項目名
-   * @param string $method エラーがあったバリデーション条件
-   * @param string $condition バリデーション時の条件
-   * @return string エラーメッセージ
+   * @return array $error_messages 「key.method => エラーメッセージ」の形で格納した配列
    */
-  protected function messages($key, $method, $condition = null) {
-    // 
+  protected function messages() {
+    // エラーメッセージ格納用配列
+    $error_messages = [];
+
+    // 項目名、バリデーション項目、バリデーション条件を元にエラーメッセージを作成する
+    foreach($this->validation->getColumnsAndMethods() as $column => $methods) {
+      foreach($methods as $method) {
+        $condition = '';
+        // バリデーション項目にバリデーション条件が指定されているか判定
+        if($this->validation->hasCondition($method)) {
+          $method_and_condition = $this->validation->getMethodAndCondition($method);
+          $method = $method_and_condition[0];
+          $condition = $method_and_condition[1];
+        }
+        // 各バリデーション項目に応じてエラーメッセージを作成する
+        switch($method) {
+          case 'require':
+            $error_messages["{$column}.{$method}"] = "{$column} is required";
+            break;
+          case 'number':
+            $error_messages["{$column}.{$method}"] = "{$column} must be number";
+            break;
+          case 'string':
+            $error_messages["{$column}.{$method}"] = "{$column} must be string";
+            break;
+          case 'min':
+            $error_messages["{$column}.{$method}"] = "{$column} must be {$condition} or more";
+            break;
+          case 'max':
+            $error_messages["{$column}.{$method}"] = "{$column} must be {$condition} or less";
+            break;
+        }
+      }
+    }
+
+    return $error_messages;
   }
 }
