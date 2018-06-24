@@ -43,9 +43,9 @@ class Request {
    *
    * @param hash_array $params バリデーションを行う項目とその判定方法を格納した連想配列
    * @param string $view バリデーションエラーがあった場合に表示するビュー
-   * @return void
+   * @return bool
    */
-  public function validate($params, $view) {
+  public function validate($params, $view = null) {
     // バリデーションインスタンスをプロパティに格納
     $this->validation = new Validation($params);
 
@@ -55,27 +55,18 @@ class Request {
     // エラーが存在していたらエラープロパティにその値をセット
     if($this->validation->hasError()) {
       $this->setErrorMessages();
+      // viewがセットされている場合はviewを表示
+      if(!is_null($view)) {
+        $this->outputView($view);
+      }
+      return false;
     }
 
-    // エラーが存在していた場合は、エラーをセットしてviewを表示
-    if(count($this->errors) > 0) {
-      // テンプレートインスタンスの生成
-      $template = new Template($view);
-
-      // エラーをセット
-      $template->setErrors($this->errors);
-
-      // 入力値をセット
-      $template->setOld($this->query);
-
-      // ビューの表示
-      $template->outputTemplate();
-      exit;
-    }
+    return true;
   }
 
   /**
-   * エラーメッセージをセットする
+   * エラーメッセージセッター
    *
    * @return void
    */
@@ -96,6 +87,15 @@ class Request {
         }
       }
     }
+  }
+
+  /**
+   * エラーメッセージ取得用ゲッターメソッド
+   *
+   * @return array $errors エラーメッセージプロパティ
+   */
+  public function getErrorMessages() {
+    return $this->errors;
   }
 
   /**
@@ -139,5 +139,26 @@ class Request {
     }
 
     return $error_messages;
+  }
+
+  /**
+   * Viewを表示
+   *
+   * @param string $view 表示するビュー
+   * @return void
+   */
+  private function outputView($view) {
+    // テンプレートインスタンスの生成
+    $template = new Template($view);
+
+    // エラーをセット
+    $template->setErrors($this->errors);
+
+    // 入力値をセット
+    $template->setOld($this->query);
+
+    // ビューの表示
+    $template->outputTemplate();
+    exit;
   }
 }

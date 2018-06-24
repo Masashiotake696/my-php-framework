@@ -55,6 +55,7 @@ class Template {
    * 入力値を埋め込む
    *
    * @param hash_array $query 入力値の連想配列
+   * @return void
    */
   public function setOld($query) {
     // 入力値を出力するテンプレート部分を全て取得

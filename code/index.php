@@ -1,6 +1,7 @@
 <?php
 // vendorファイルの読み込み
 require_once('./vendor/Request.php');
+require_once('./vendor/Template.php');
 require_once('./vendor/controller/BaseController.php');
 require_once('./vendor/controller/DatabaseController.php');
 
@@ -93,8 +94,22 @@ try {
       $request = new $form_request_name($path, $query_hash);
       // ルールを実行する
       $rules = $request->rules();
-      // バリデーションを実行
-      $request->validate($rules[0], $rules[1]);
+
+      // バリデーションを実行してエラーがあった場合は指定されたビューを表示
+      if($request->validate($rules[0]) === FALSE) {
+        // テンプレートインスタンスの生成
+        $template = new Template($rules[1]);
+
+        // エラーをセット
+        $template->setErrors($request->getErrorMessages());
+
+        // 入力値をセット
+        $template->setOld($request->getAllQuery());
+
+        // ビューの表示
+        $template->outputTemplate();
+        exit;
+      }
     } else {
       // リクエストインスタンスを生成
       $request = new Request($path, $query_hash);

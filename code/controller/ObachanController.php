@@ -16,14 +16,14 @@ class ObachanController extends BaseController {
    * とりあえずバリデーションする
    */
   public function create(Request $request) {
-    // $request->validate(
-    //   [
-    //     'name' => ['string', 'min:1', 'max:20'],
-    //     'age' => ['number', 'min:0', 'max:130'],
-    //     'address' => ['string', 'require'],
-    //   ],
-    //   'obachan'
-    // );
+    $request->validate(
+      [
+        'name' => ['string', 'min:1', 'max:20'],
+        'age' => ['number', 'require', 'min:0', 'max:130'],
+        'address' => ['string', 'require'],
+      ],
+      'obachan'
+    );
 
     echo 'OK';
     exit;
