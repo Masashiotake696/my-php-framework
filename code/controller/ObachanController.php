@@ -1,10 +1,16 @@
 <?php
+require_once('./model/Users.php');
 
-class ObachanController extends BaseController {
+class ObachanController extends DatabaseController {
   /**
    * ページを表示
    */
   public function show() {
+    $all_user = Users::all();
+    var_dump($all_user);
+    $find_user = Users::find(7);
+    var_dump($find_user);
+
     // テンプレートインスタンスの生成
     $obachan = new Template('obachan');
 
@@ -24,8 +30,5 @@ class ObachanController extends BaseController {
       ],
       'obachan'
     );
-
-    echo 'OK';
-    exit;
   }
 }
