@@ -17,6 +17,12 @@ abstract class DatabaseController extends BaseController {
             $this->$action($request);
             // 例外処理がなかった場合はコミット
             self::$pdo->commit();
+        } catch(OreOreException $e) {
+            // 接続に失敗した場合はエラーメッセージを出す
+            self::$pdo->rollback();
+
+            echo $e->getMessage();
+            exit;
         } catch(Exception $e) {
             // 接続に失敗した場合はエラーメッセージを出す
             self::$pdo->rollback();
