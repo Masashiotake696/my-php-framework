@@ -19,20 +19,20 @@ class ObachanController extends DatabaseController {
     // var_dump($find_user_array);
 
     // update
-    // $first_user = Users::find(7);
-    // $first_user->name = 'upupup';
-    // $first_user->password = 'upupup';
-    // $first_user->save();
-    // var_dump(Users::find(100));
+    $first_user = Users::find(7);
+    $first_user->name = 'oba2';
+    $first_user->password = 'obaoba';
+    $first_user->save();
+    var_dump(Users::find(7));
 
     // insert
     // $insert = new Users();
-    // $insert->name = 'taro';
-    // $insert->password = '01010';
+    // $insert->name = 'oba2';
+    // $insert->password = '0baoba2';
     // $insert->save();
 
     // delete
-    // $delete = Users::find(32);
+    // $delete = Users::find(31);
     // $delete->delete();
 
     // テンプレートインスタンスの生成
